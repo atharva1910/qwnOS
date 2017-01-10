@@ -69,6 +69,11 @@ void terminal_putat(const char c, uint8_t color, size_t x, size_t y)
 
 void terminal_putchar(const char c)
 {
+	if (c == '\n') {
+		++terminal_row;
+		terminal_column = 0;
+		return;
+	}
     terminal_putat(c, terminal_color, terminal_column, terminal_row);
     if(++terminal_column == VGA_WIDTH){
         terminal_column = 0;
@@ -93,5 +98,5 @@ extern "C"
 void kernel_main(void)
 {
     terminal_init();
-    terminal_writestring("Hello");
+    terminal_writestring("Welcome to qwnOS \nHello");
 }
