@@ -61,6 +61,24 @@ void terminal_init()
     }
 }
 
+void scroll_term()
+{
+    size_t index = 0;
+    size_t index_to = (VGA_HEIGHT - 1) * VGA_WIDTH;
+    // copy the contents from the next line to the line above
+    // TODO : break if no content to be copied ( optimize this)
+    while(index < index_to){
+        terminal_buffer[index] = terminal_buffer[index + VGA_WIDTH];
+        index++;
+    }
+    // clear the last line
+    index_to += VGA_WIDTH;
+    for(; index < index_to; index++)
+        terminal_buffer[index] = vga_entry(' ', terminal_color);
+    terminal_row = 0;
+    terminal_column = VGA_HEIGHT;
+}
+
 void terminal_putat(const char c, uint8_t color, size_t x, size_t y)
 {
     const size_t index = y * VGA_WIDTH + x;
@@ -77,8 +95,10 @@ void terminal_putchar(const char c)
     terminal_putat(c, terminal_color, terminal_column, terminal_row);
     if(++terminal_column == VGA_WIDTH){
         terminal_column = 0;
-        if ( ++terminal_row == VGA_HEIGHT)
-            terminal_row = 0;
+        if ( ++terminal_row == VGA_HEIGHT){
+			terminal_row = 0;
+			scroll_term();
+		}
     }
 }
 
@@ -98,5 +118,11 @@ extern "C"
 void kernel_main(void)
 {
     terminal_init();
-    terminal_writestring("Welcome to qwnOS \nHello");
+    scroll_term();
+    /*
+    for (size_t i = 0; i < VGA_HEIGHT; i++) {
+    terminal_writestring("Welcome to qwnOS \n");        
+    }
+    terminal_writestring("asdf");
+    */
 }
